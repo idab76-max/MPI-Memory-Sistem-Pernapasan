@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padanan Memori — Organ Sistem Pernapasan</title>
+<style>
+:root{--ink:#18324b;--blue:#176b87;--teal:#20a69a;--cream:#fffaf0;--gold:#ffd166;--pink:#ff8fa3;--green:#d9f7e8}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(135deg,#e7f8ff,#f6efff 55%,#fff6df);min-height:100vh}
+header{text-align:center;padding:24px 16px 14px}
+.eyebrow{display:inline-block;background:#fff;border:2px solid #d8e9f5;border-radius:999px;padding:6px 14px;font-size:.9rem;font-weight:800;letter-spacing:.04em}
+h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.1;margin:12px 0 8px;color:#124d69}
+header p{margin:0 auto;max-width:760px;font-size:clamp(1rem,2vw,1.15rem)}
+main{max-width:1100px;margin:0 auto;padding:10px 16px 36px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;margin:12px 0 18px}
+.stat{background:#fff;border:2px solid #dcecf5;border-radius:16px;padding:10px 18px;min-width:125px;text-align:center;box-shadow:0 4px 0 #d7e7ef}
+.stat span{display:block;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#537084}
+.stat strong{display:block;font-size:1.5rem;color:#124d69}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+.action{border:0;border-radius:14px;padding:13px 18px;font-weight:800;background:#176b87;color:white;box-shadow:0 4px 0 #0d4b62}
+.action:active{transform:translateY(2px);box-shadow:0 2px 0 #0d4b62}
+#message{min-height:58px;display:flex;align-items:center;justify-content:center;text-align:center;margin:10px auto 18px;padding:12px 16px;max-width:800px;background:#fff;border:2px solid #dcecf5;border-radius:16px;font-weight:750;font-size:1.05rem}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.card{position:relative;min-height:130px;border:0;border-radius:18px;padding:10px;background:#176b87;color:white;box-shadow:0 6px 0 #0d4b62;display:flex;align-items:center;justify-content:center;text-align:center;transition:transform .15s,background .2s;user-select:none;overflow:hidden}
+.card:focus-visible{outline:4px solid #ffb703;outline-offset:3px}
+.card .back{font-size:clamp(2rem,5vw,3.4rem);font-weight:900}
+.card .front{display:none;font-size:clamp(.92rem,1.8vw,1.2rem);font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+.card.open{background:#fff;color:#173f58;border:3px solid #62bfd0;box-shadow:0 5px 0 #b1dfe6}
+.card.open .back,.card.matched .back{display:none}
+.card.open .front,.card.matched .front{display:block}
+.card.matched{background:var(--green);border:3px solid #4bb889;color:#155b43;box-shadow:0 5px 0 #9edfc0;cursor:default}
+.card.matched:after{content:"✓ Cocok!";position:absolute;top:5px;right:7px;font-size:.68rem;color:#176b50;font-weight:900}
+.card:disabled{opacity:1}
+.instructions{margin:22px auto 0;max-width:800px;padding:16px 18px;background:rgba(255,255,255,.8);border:2px dashed #b8d8e7;border-radius:16px}
+.instructions h2{margin:0 0 8px;font-size:1.1rem}
+.instructions p{margin:4px 0}
+footer{text-align:center;padding:0 16px 24px;color:#557185;font-size:.88rem}
+@media(max-width:700px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.card{min-height:112px;padding:8px}.stat{min-width:100px;padding:8px 12px}}
+@media(max-width:420px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.card{min-height:105px}}
+@media(min-width:900px){.card{min-height:145px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">PERMAINAN IPAS • KELAS 6 SD</div>
+  <h1>🫁 Padanan Memori</h1>
+  <p>Organ Sistem Pernapasan Manusia — buka dua kartu, lalu temukan istilah dan fungsi yang saling berpasangan!</p>
+</header>
+<main>
+  <section class="toolbar" aria-label="Statistik permainan">
+    <div class="stat"><span>Langkah</span><strong id="moves">0</strong></div>
+    <div class="stat"><span>Pasangan</span><strong id="pairs">0 / 8</strong></div>
+    <div class="stat"><span>Skor</span><strong id="score">0</strong></div>
+    <button class="action" id="restart" type="button">↻ Mulai Ulang</button>
+    <button class="action" id="soundToggle" type="button" aria-pressed="true">🔊 Suara: Aktif</button>
+  </section>
+  <div id="message" role="status" aria-live="polite">Ayo mulai! Temukan 8 pasangan kartu yang tepat.</div>
+  <section class="grid" id="board" aria-label="Kartu permainan"></section>
+  <section class="instructions">
+    <h2>🎯 Cara bermain</h2>
+    <p>1. Sentuh satu kartu untuk membukanya, lalu pilih kartu kedua.</p>
+    <p>2. Cocokkan nama organ dengan fungsi atau penjelasannya.</p>
+    <p>3. Setiap pasangan benar mendapat <strong>+100 poin</strong>. Selesaikan semua pasangan dengan langkah sesedikit mungkin!</p>
+  </section>
+</main>
+<footer>Belajar IPAS jadi seru — SD Negeri 8 Kodeoha</footer>
+<script>
+(() => {
+  const pairs = [
+    ["Hidung", "Menyaring, menghangatkan, dan melembapkan udara yang masuk."],
+    ["Faring", "Persimpangan saluran yang menghubungkan rongga hidung dan tenggorokan."],
+    ["Laring", "Tempat pita suara berada; mengarahkan udara ke trakea."],
+    ["Trakea", "Batang tenggorokan yang menyalurkan udara menuju bronkus."],
+    ["Bronkus", "Dua cabang trakea yang menuju paru-paru kanan dan kiri."],
+    ["Bronkiolus", "Cabang-cabang kecil bronkus di dalam paru-paru."],
+    ["Alveolus", "Kantung udara kecil tempat pertukaran oksigen dan karbon dioksida."],
+    ["Paru-paru", "Organ utama pernapasan tempat berlangsungnya pertukaran gas."]
+  ];
+  const board = document.getElementById('board');
+  const movesEl = document.getElementById('moves');
+  const pairsEl = document.getElementById('pairs');
+  const scoreEl = document.getElementById('score');
+  const message = document.getElementById('message');
+  const soundToggle = document.getElementById('soundToggle');
+  let deck = [], first = null, second = null, locked = false, moves = 0, found = 0, score = 0, soundOn = true, audioCtx = null;
+
+  function tone(freq, duration=.12, type='sine', volume=.045) {
+    if (!soundOn) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      osc.type = type; osc.frequency.value = freq; gain.gain.value = volume;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + duration);
+      osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+  }
+  function shuffle(a) {
+    for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+  function updateStats() {
+    movesEl.textContent = moves;
+    pairsEl.textContent = `${found} / ${pairs.length}`;
+    scoreEl.textContent = score;
+  }
+  function makeCard(text, pairId, type) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'card'; b.dataset.pair = pairId;
+    b.dataset.type = type; b.setAttribute('aria-label','Kartu tertutup');
+    b.innerHTML = `<span class="back" aria-hidden="true">?</span><span class="front"></span>`;
+    b.querySelector('.front').textContent = text;
+    b.addEventListener('click', () => reveal(b));
+    return b;
+  }
+  function startGame() {
+    board.innerHTML = ''; first = second = null; locked = false; moves = found = score = 0;
+    deck = [];
+    pairs.forEach((p,i) => { deck.push({text:p[0],id:i,type:'organ'},{text:p[1],id:i,type:'fungsi'}); });
+    shuffle(deck).forEach(c => board.appendChild(makeCard(c.text,c.id,c.type)));
+    updateStats(); message.textContent = 'Ayo mulai! Temukan 8 pasangan kartu yang tepat.';
+    tone(540,.08);
+  }
+  function reveal(card) {
+    if (locked || card.classList.contains('open') || card.classList.contains('matched')) return;
+    card.classList.add('open'); card.setAttribute('aria-label',card.querySelector('.front').textContent);
+    tone(420,.07);
+    if (!first) { first = card; message.textContent = 'Pilih satu kartu lagi untuk mencari pasangannya.'; return; }
+    second = card; moves++; updateStats();
+    const isMatch = first.dataset.pair === second.dataset.pair && first.dataset.type !== second.dataset.type;
+    if (isMatch) {
+      first.classList.remove('open'); second.classList.remove('open');
+      first.classList.add('matched'); second.classList.add('matched');
+      first.disabled = true; second.disabled = true;
+      first.setAttribute('aria-label','Pasangan cocok: '+first.querySelector('.front').textContent);
+      second.setAttribute('aria-label','Pasangan cocok: '+second.querySelector('.front').textContent);
+      found++; score += 100; updateStats(); tone(660,.13); setTimeout(()=>tone(880,.18),100);
+      message.textContent = `Hebat! Pasangan cocok ditemukan. +100 poin (${found} dari ${pairs.length}).`;
+      first = second = null;
+      if (found === pairs.length) {
+        score += Math.max(0, (pairs.length*3 - moves) * 10); updateStats();
+        message.textContent = `🎉 Luar biasa! Semua pasangan ditemukan dalam ${moves} langkah. Skor akhir: ${score}.`;
+        tone(740,.15); setTimeout(()=>tone(880,.15),150); setTimeout(()=>tone(1040,.25),300);
+      }
+    } else {
+      locked = true; message.textContent = 'Belum cocok. Ingat posisi kartu, lalu coba lagi!';
+      tone(220,.16,'triangle');
+      setTimeout(() => {
+        first.classList.remove('open'); second.classList.remove('open');
+        first.setAttribute('aria-label','Kartu tertutup'); second.setAttribute('aria-label','Kartu tertutup');
+        first = second = null; locked = false;
+      }, 950);
+    }
+  }
+  document.getElementById('restart').addEventListener('click', startGame);
+  soundToggle.addEventListener('click', () => {
+    soundOn = !soundOn; soundToggle.textContent = soundOn ? '🔊 Suara: Aktif' : '🔇 Suara: Mati';
+    soundToggle.setAttribute('aria-pressed',String(soundOn)); if(soundOn) tone(600,.1);
+  });
+  startGame();
+})();
+</script>
+</body>
+</html>
